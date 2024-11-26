@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document123</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+        <script src="https://unpkg.com/vue-router@3.0.0/dist/vue-router.js"></script>
+
+        <style>
+            ul {
+                list-style-type: none;
+                padding: 0;
+            }
+            li {
+                display: inline-block;
+            }
+            a {
+                padding: 5px;
+            }
+        </style> 
+    </head>
+
+<body>
+    <div id="app">
+        <ul>
+            <li><router-link tag="div" to="/" exact>Домашняя</router-link></li>
+            <li><router-link tag="div" to="/books">Книги</router-link></li>
+        </ul>
+        <router-view></router-view>
+
+    </div>
+    <script>
+        const NotFound = { template: '<h2>Page not Found</h2>' };
+        const Home = { template: '<div><h2>Привет!</h2></div>' };
+        const arrayBooks = [
+            { name: 'Финансист', author: 'Драйзер Теодор', desc: '1 часть знаменитой трилогии желаний', component: { template: '<h2>Финансист</h2>' } },
+            { name: 'Титан', author: 'Драйзер Теодор', desc: '2 часть знаменитой трилогии желаний', component: { template: '<h2>Титан</h2>' } },
+            { name: 'Стоик', author: 'Драйзер Теодор', desc: '3 часть знаменитой трилогии желаний', component: { template: '<h2>Стоик</h2>' } },
+
+        ];
+
+        const booksRoutes = arrayBooks.map(book => ({
+            path: book.name.toLowerCase(),
+            component: {template: `<div>
+                                        <h2>{{ book.name }}</h2>
+                                        <p>Автор: {{ book.author }}</p>
+                                        <p>Описание: {{ book.desc }}</p>
+                                        </div>`,
+                        data() {
+                            return {
+                                book: this.getBook()
+                            };
+                        },
+                    methods: {
+                        getBook() {
+                            const bookName = this.$route.path.split('/').pop();
+                            return arrayBooks.find(b =>b.name.toLowerCase() === bookName);
+                        }
+                    }
+                }
+
+        }));
+
+        const Index = {
+            template: `<div>
+                    <h3>Выберете книгу</h3>
+                    ${arrayBooks.map(book => `<div><router-link to="/books/${book.name.toLowerCase()}">${book.name}</router-link></div>`).join('')}
+                    </div>`
+        };
+        const Books = { template: `
+            <div>
+                <h1>Книги</h1>
+                <router-view></router-view>
+                <div v-if="$route.path !== '/books' && $route.path.startsWith('/books/')"><router-link to ="/books"><br><button>назад</button></router-link></div>
+                <div><router-link to ="/"><br><button>домой</button></router-link></div>
+                </div>` };
+
+        const routes = [
+            { path: '/', component: Home },
+            { path: '*', component: NotFound },
+            {
+                path: '/books', component: Books,
+                children: [
+                    ...booksRoutes,
+                    { path: '', component: Index }
+                ]
+            }
+        ];
+
+        const router = new VueRouter({
+            mode: 'history',
+            routes
+        });
+
+        new Vue({
+            el: '#app',
+            router
+        });
+
+    </script>
+</body>
+
+</html>
